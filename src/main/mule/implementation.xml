@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<flow name="employeeGET" doc:id="1f9dfb46-1fba-42dc-820b-aefcca1d0f30" >
+		<db:select doc:name="Select" doc:id="38d31eb5-a5a7-44d5-8df5-d7fc3adedda9" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * from employee where Id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+  'id': attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="abe5250b-36dc-4311-b08c-5d952041599d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="10caa1a3-4578-42e6-a9e8-3fdbc92837b1" >
+				<ee:transform doc:name="Transform Message" doc:id="443c1f1b-9d8c-48f9-8a90-04044a91f122" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="employeePOST" doc:id="0f8b4e67-9429-4609-8e33-f595875c3705" >
+		<db:insert doc:name="Insert" doc:id="3cf875f5-06b3-47dd-b7ea-5f4b36371154" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into employee(Name,Email,Age,City,Project,Manager) values(:Name,:Email,:Age,:City,:Project,:Manager)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+ 'Id': payload.Id,
+'Name': payload.Name,
+'Email': payload.Email,
+'Age': payload.Age,
+'City': payload.City,
+'Project': payload.Project,
+'Manager': payload.Manager
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="ff41dcb9-82b0-4215-b339-f05f07f1aed2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee details has been inserted."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e34713cd-2d16-40d9-a98a-90baaa8e36a5" >
+				<ee:transform doc:name="Transform Message" doc:id="55075b7b-669e-411e-91ad-aa1f38d953c3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="employeeDEL" doc:id="feca0440-a6aa-4f67-a4e9-4fba1d2436d4" >
+		<db:delete doc:name="Delete" doc:id="938757e8-6faf-4849-a87c-78e36b68bc22" config-ref="Database_Config">
+			<db:sql ><![CDATA[DELETE from employee where Id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	'id': attributes.uriParams.ID
+}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="4b1b12e8-07f8-46f3-b67e-4fa25f61e67a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee details has been deleted."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4a8a65bc-71fd-4d6d-9e53-34ac89c620e7" >
+				<ee:transform doc:name="Transform Message" doc:id="48edcec8-8afc-42dd-972c-f018b40fd9a7" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="employeePUT" doc:id="06ddcf62-cf65-4603-9b40-6f544a4d5283" >
+		<db:update doc:name="Update" doc:id="200e65e2-6435-4ced-99b6-55d4b957fd15" config-ref="Database_Config">
+			<db:sql ><![CDATA[update employee set 
+Name=:Name,Email=:Email,Age=:Age,City=:City,Project=:Project,Manager=:Manager
+where Id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	 'id': attributes.uriParams.'ID',
+	 'Name': payload.Name,
+	 'Email': payload.Email,
+	 'Age': payload.Age,
+	 'City': payload.City,
+	 'Project': payload.Project,
+	 'Manager': payload.Manager
+}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="3ce0c8f0-3dfb-432c-9137-8a95ffd53d7b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Employee details has been updated."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="b8266027-5158-4fdc-8f3e-7a464776a51f" >
+				<ee:transform doc:name="Transform Message" doc:id="16ee1b6f-3256-4e67-858a-fcf8a9bc2ce0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"message": error.description
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

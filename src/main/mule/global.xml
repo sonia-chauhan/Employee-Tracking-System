@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="400dd1c7-ead4-4ce6-a4f4-13511e1cacf1" file="config.yaml" />
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="985e7aa3-b08b-4608-aeb7-4d2aa8384266" >
+		<db:my-sql-connection host="${db.host}" port="${db.port}" user="${db.user}" password="${db.pass}" database="${db.dbName}"/>
+	</db:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cd3b7f02-bddf-4169-9dd3-f73a9f0a674a" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="ece39f2c-7bd0-49d3-bea6-22a1ccf22b38" >
+		<salesforce:basic-connection username="${sf.userName}" password="${sf.pass}" securityToken="${sf.token}" />
+	</salesforce:sfdc-config>
+	<api-gateway:autodiscovery apiId="16584054" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="3404f01f-e246-4aa3-8ebb-e7a552687133" flowRef="employee-tracking-system-main"/>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="c54e7442-01b0-435c-a1bc-3d00272bbb85" >
+		<email:smtp-connection host="${email.host}" port="${email.port}" user="${email.user}" password="${email.pass}" />
+	</email:smtp-config>
+</mule>
